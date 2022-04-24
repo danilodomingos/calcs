@@ -1,10 +1,8 @@
 class NumeroPrimo {
 
-    constructor(){
+    constructor(){}
 
-    }
-
-    ehPrimo(numero){
+    static ehPrimo(numero){
 
         if(numero < 0 ){
             numero  *= -1;

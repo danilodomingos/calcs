@@ -1,3 +1,6 @@
 const NumeroPrimo = require('./models/NumeroPrimo');
+const NumeroDivisores = require('./models/NumeroDivisores');
 
-const primo = new NumeroPrimo();
+// console.log(NumeroPrimo.ehPrimo(3))
+// console.log(NumeroDivisores.getDivisores(13));
+console.log(NumeroDivisores.getDivisores(120));
