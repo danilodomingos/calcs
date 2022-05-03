@@ -1,4 +1,4 @@
-class NumeroPrimo {
+class Primo {
 
     constructor(){}
 
@@ -25,4 +25,4 @@ class NumeroPrimo {
     }
 }
 
-module.exports = NumeroPrimo;
+module.exports = Primo;

@@ -1,8 +1,8 @@
-const NumeroPrimo = require('./NumeroPrimo');
+const Primo = require('./Primo');
 const Potencia = require('./Potencia');
 const _ = require('lodash');
 
-class NumeroDivisores {
+class Divisor {
 
     static getDivisores(numero) {
 
@@ -10,7 +10,7 @@ class NumeroDivisores {
             throw Exception("Zero não pode ser dividido.");
         }
 
-        if (NumeroPrimo.ehPrimo(numero)) {
+        if (Primo.ehPrimo(numero)) {
             return [1, numero];
         }
 
@@ -24,7 +24,7 @@ class NumeroDivisores {
 
         for (let divisor = 2; divisor <= dividendo; divisor++) {
 
-            if (!NumeroPrimo.ehPrimo(divisor)) {
+            if (!Primo.ehPrimo(divisor)) {
                 continue;
             }
 
@@ -54,28 +54,15 @@ class NumeroDivisores {
 
         const fatores = this._percorreFatores(listaDeBaseDasPotencias, listaDePotenciasComExpoentesExpandidos);
 
-        console.log(fatores);
+        const divisores = fatores.map((potencias) => 
+        {
+            const listaDeResultados = potencias.map((potencia) => potencia.base ** potencia.expoente);
+            return listaDeResultados.reduce((proximo, corrente) => proximo * corrente);
+        });
 
-        // const divisores = fatores.map((potencias) => {
-        //     const listaDeResultados = potencias.map((potencia) => potencia.base ^ potencia.expoente);
-        //     return listaDeResultados.reduce((proximo, corrente) => proximo * corrente);
-        // });
+        const divisoresOrdenados = divisores.sort((d1, d2) => d1 - d2);
 
-        // console.log(divisores);
-
-
-        /*
-          [
-            Potencia { base: 2, expoente: 3 },
-            Potencia { base: 3, expoente: 0 },
-            Potencia { base: 5, expoente: 1 }
-          ],
-        */
-
-        
-
-
-        return listaDePotencias;
+        return divisoresOrdenados;
     }
 
     static _expandeExpoentes(potencias) {
@@ -110,16 +97,15 @@ class NumeroDivisores {
 
             listaDePotenciasComBaseDoPrimeiroIndice.forEach(pot => {
 
-            // listaDeFatores = this._removePotenciaAnteriorComMesmoValorDeBase(pot, listaDeFatores);
-            if(listaDeFatores.length > 1){
-                listaDeFatores.pop();
-            }            
+            listaDeFatores = this._removePotenciaAnteriorComMesmoValorDeBase(pot, listaDeFatores);
+      
             listaDeFatores.push(pot);
 
             const listaDeBaseDasPotenciasSemPrimeiroIndice = listaDeBaseDasPotencias.filter(base => base !== listaDeBaseDasPotencias[0]);
             const listaDePotenciasSemABaseDoPrimeiroIndice = listaDePotencias.filter(p => p.base !== listaDeBaseDasPotencias[0]);
 
             this._percorreFatores(listaDeBaseDasPotenciasSemPrimeiroIndice, listaDePotenciasSemABaseDoPrimeiroIndice, listaDeFatores, listaComTodosOsFatores)
+            
             });
         }
 
@@ -132,4 +118,4 @@ class NumeroDivisores {
 
 }
 
-module.exports = NumeroDivisores;
+module.exports = Divisor;
