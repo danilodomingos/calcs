@@ -1,6 +1,8 @@
 class Primo {
-
-    constructor(){}
+    constructor(base, expoente){
+        this.base = base;
+        this.expoente = expoente;
+    }
 
     static ehPrimo(numero){
 
