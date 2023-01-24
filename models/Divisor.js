@@ -1,26 +1,19 @@
 const Primo = require('./Primo');
-const Potencia = require('./Potencia');
-const _ = require('lodash');
 
 class Divisor {
-
     static getDivisores(numero) {
 
-        if (numero === 0) {
-            throw Exception("Zero não pode ser dividido.");
-        }
-
-        if (Primo.ehPrimo(numero)) {
+        if(Primo.ehPrimo(numero)){
             return [1, numero];
         }
 
-        const potencias = this._decomporEmPrimos(numero);
-        const divisores = this._encontraDivisores(potencias);
-
+        const fatoresPrimos = this.getFatoresPrimos(numero);
+        const divisores = this.multiplicaFatoresPrimos(fatoresPrimos);
+        
         return divisores;
     }
 
-    static _decomporEmPrimos(dividendo, divisoresPrimos = []) {
+    static getFatoresPrimos(dividendo, fatoresPrimos = []) {
 
         for (let divisor = 2; divisor <= dividendo; divisor++) {
 
@@ -30,92 +23,64 @@ class Divisor {
 
             const quociente = dividendo / divisor;
             const resto = dividendo % divisor;
+            const ehDivisivel = resto == 0;
 
-            if (resto == 0) {
-                divisoresPrimos.push(divisor);
-                return this._decomporEmPrimos(quociente, divisoresPrimos);
+            if (ehDivisivel) {
+                this._adicionaOuAtualizaFatorPrimo(divisor, fatoresPrimos);
+                return this.getFatoresPrimos(quociente, fatoresPrimos);
             }
         }
 
-        const divisoresPrimosAgrupadosPorValor = _.groupBy(divisoresPrimos);
-
-        const potencias = Object.entries(divisoresPrimosAgrupadosPorValor)
-            .map(([base, expoente]) => {
-                return new Potencia(parseInt(base), parseInt(expoente.length));
-            });
-
-        return potencias;
+        return fatoresPrimos;
     }
 
-    static _encontraDivisores(listaDePotencias) {
+    static multiplicaFatoresPrimos(fatores, indiceAtual = 0, fatoresIterados = [], resultados = []) {
+        const fator = fatores[indiceAtual];
+        const proximoIndice = indiceAtual + 1;
+        const proximosFatores = fatores.slice(proximoIndice);
+        const temProximoFator = proximosFatores.length > 0;
 
-        const listaDeBaseDasPotencias = listaDePotencias.map(item => item.base);
-        const listaDePotenciasComExpoentesExpandidos = this._expandeExpoentes(listaDePotencias);
+        for(let expoente = fator.expoente; expoente >= 0; expoente--) {
 
-        const fatores = this._percorreFatores(listaDeBaseDasPotencias, listaDePotenciasComExpoentesExpandidos);
+            const fatorComExpoenteAtual = new Primo(fator.base, expoente);
 
-        const divisores = fatores.map((potencias) => 
-        {
-            const listaDeResultados = potencias.map((potencia) => potencia.base ** potencia.expoente);
-            return listaDeResultados.reduce((proximo, corrente) => proximo * corrente);
-        });
+            if(temProximoFator) {
+                fatoresIterados = this._removeFatorComMesmoValorDeBase(fatoresIterados, fatorComExpoenteAtual);
+                fatoresIterados.push(fatorComExpoenteAtual);
+                this.multiplicaFatoresPrimos(fatores, proximoIndice, fatoresIterados, resultados);
+            } else {
 
-        const divisoresOrdenados = divisores.sort((d1, d2) => d1 - d2);
-
-        return divisoresOrdenados;
-    }
-
-    static _expandeExpoentes(potencias) {
-
-        const potenciasExpandidas = [];
-
-        potencias.forEach(potencia => {
-
-            for (let expoente = 0; expoente <= potencia.expoente; expoente++) {
-                potenciasExpandidas.push(new Potencia(potencia.base, expoente));
+                const fatoresParaMultiplicar = [...fatoresIterados, fatorComExpoenteAtual].map((item) => item.base ** item.expoente);
+                const fatoresMultiplicados = fatoresParaMultiplicar.reduce((proximo, corrente) => proximo * corrente);
+                resultados.push(fatoresMultiplicados);
             }
-        });
+        }
 
-        return potenciasExpandidas;
+        return resultados.sort((d1, d2) => d1 - d2);
     }
 
-    static _percorreFatores(listaDeBaseDasPotencias, listaDePotencias, listaDeFatores = [], listaComTodosOsFatores = []) {
+    static _adicionaOuAtualizaFatorPrimo(base, fatoresPrimos) {
 
-        const ehUltimaBase = (listaDeBaseDasPotencias.length === 1);
-        const listaDePotenciasComBaseDoPrimeiroIndice = listaDePotencias.filter(pot => pot.base === listaDeBaseDasPotencias[0]);
-
-        if(ehUltimaBase) {
-
-            listaDePotenciasComBaseDoPrimeiroIndice.forEach(pot => {
-                const novaListaDeFatores = listaDeFatores.concat(pot);
-                listaComTodosOsFatores.push(novaListaDeFatores);
-            });
-
-            listaDeFatores = [];
+        const indiceDoFator = fatoresPrimos.findIndex(item => item.base === base);
+        const jaExisteFator = indiceDoFator >= 0;
             
+        if(jaExisteFator) {
+            this._atualizaExpoenteDoFator(fatoresPrimos, indiceDoFator);
         } else {
-
-            listaDePotenciasComBaseDoPrimeiroIndice.forEach(pot => {
-
-            listaDeFatores = this._removePotenciaAnteriorComMesmoValorDeBase(pot, listaDeFatores);
-      
-            listaDeFatores.push(pot);
-
-            const listaDeBaseDasPotenciasSemPrimeiroIndice = listaDeBaseDasPotencias.filter(base => base !== listaDeBaseDasPotencias[0]);
-            const listaDePotenciasSemABaseDoPrimeiroIndice = listaDePotencias.filter(p => p.base !== listaDeBaseDasPotencias[0]);
-
-            this._percorreFatores(listaDeBaseDasPotenciasSemPrimeiroIndice, listaDePotenciasSemABaseDoPrimeiroIndice, listaDeFatores, listaComTodosOsFatores)
-            
-            });
+            const fatorPrimo = new Primo(base, 1);
+            fatoresPrimos.push(fatorPrimo);                   
         }
-
-        return listaComTodosOsFatores;
     }
 
-    static _removePotenciaAnteriorComMesmoValorDeBase(potencia, listaDeFatores) {
-        return listaDeFatores.filter(fator => fator.base !== potencia.base);
+    static _atualizaExpoenteDoFator(fatoresPrimos, indiceDoFator) {
+        const fatorPrimo = fatoresPrimos[indiceDoFator];
+        fatorPrimo.expoente += 1;
+        fatoresPrimos[indiceDoFator] = fatorPrimo;
     }
 
+    static _removeFatorComMesmoValorDeBase(fatoresIterados, fatorAtual) {
+        return fatoresIterados.filter(item => item.base !== fatorAtual.base );
+    }
 }
 
 module.exports = Divisor;
