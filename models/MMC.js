@@ -20,10 +20,30 @@ class MMC {
         });
 
         const divisores = linhaDeDivisao.map(item => item.divisores);
-        const divisoresIguais = lodash.intersection(...divisores)?.filter(valor => valor > 1);
+        const menorDivisor = this._encontraMenorDivisor(divisores);
 
-        console.log(divisoresIguais);
+
+        /* 
+            2, 8, 4, 7 |
+                       |
+                       |
+                       |
+                   
         
+        
+        */
+
+        console.log('divisores');
+        console.log(divisores);
+        
+    }
+
+    static _encontraMenorDivisor(divisores) {
+        const arrayFlat = divisores.flatMap(num => num);
+        const numerosUnicosMaioresQueUm = [...new Set(arrayFlat)]?.filter(num => num > 1);
+        const menorDivisor = numerosUnicosMaioresQueUm.sort((d1, d2) => d1 - d2)[0];
+
+        return menorDivisor;
     }
 }
 
