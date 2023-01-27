@@ -3,6 +3,14 @@ const Primo = require('./Primo');
 class Divisor {
     static getDivisores(numero) {
 
+        if(numero === 1) {
+            return [1];
+        }
+
+        if(numero === 0) {
+            return [0];
+        }
+
         if(Primo.ehPrimo(numero)){
             return [1, numero];
         }

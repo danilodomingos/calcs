@@ -1,42 +1,29 @@
 const Divisor = require('./Divisor');
 const Primo = require('./Primo');
-const _ = require('lodash');
+const lodash = require('lodash');
 
 class MMC {
 
-    static calcular(linhaDeDividendos){
+    static calcular(numeros){
 
-        // let listaDeDividendos, listaDeDivisores = [];
+        const ehTudoPrimo = numeros.every(numero => Primo.ehPrimo(numero))
 
-
-        const listaDePrimos = linhaDeDividendos.filter((numero) => Primo.ehPrimo(numero));
-
-        if(listaDePrimos.lenght === linhaDeDividendos.lenght){
-            return linhaDeDividendos.qreduce((proximo, corrente) => proximo * corrente);
+        if(ehTudoPrimo) {
+            return numeros.reduce((anterior, proximo) => anterior * proximo);
         }
 
-        // // preenche linha de dividendos...
-        // linhaDeDividendos.forEach(valor => {
-        //     listaDeDividendos.push(valor)
-        // });
+        const linhaDeDivisao = [];
 
+        numeros.forEach(numero => {
+            const resultado = { numero, divisores: Divisor.getDivisores(numero) }
+            linhaDeDivisao.push(resultado);
+        });
 
-        // // percorre lista buscando os divisores...
-        // listaDeDividendos.forEach((dividendo, indice) => {
+        const divisores = linhaDeDivisao.map(item => item.divisores);
+        const divisoresIguais = lodash.intersection(...divisores)?.filter(valor => valor > 1);
 
-        //     if(Primo.ehPrimo(dividendo)) {
-
-        //         const removeNoIndex = indice + 1;
-        //         const listaDeDividendosSemIndiceAtual = listaDeDividendos.slice(removeNoIndex)
-        //         const listaDeProximosDividendos = [1].concat(listaDeDividendosSemIndiceAtual);
-
-
-        //     }
-        // });
-
-
-        // return listaDeDividendos;
-
+        console.log(divisoresIguais);
+        
     }
 }
 
